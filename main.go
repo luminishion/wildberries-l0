@@ -24,15 +24,11 @@ func main() {
 	log.Println("Shutdown ....")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	defer func() {
+		subscriber.StopNats()
+		orders.Close()
+		cancel()
+	}()
 
 	web.StopHTTP(ctx)
-	subscriber.StopNats()
-	orders.Close()
-
-	select {
-	case <-ctx.Done():
-		log.Println("timeout of 5 seconds.")
-	}
-	log.Println("Exiting")
 }
